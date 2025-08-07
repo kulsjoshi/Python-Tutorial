@@ -1,0 +1,3 @@
+
+Trying read and write togetherm currently learning Python and it is fun
+Appending a new line
