@@ -1,34 +1,52 @@
 import requests
 import argparse
-from config import URL
+from config import WEATHER_URL
 from config import API_KEY
 
-def get_weather(city):
+# This function will get a current weather data of the city
+def get_weather(city, units):
     param = {
         "q": city,
         "appid": API_KEY,
-        "units":"metric"
+        "units":units
     }
     
     try:    
-        response = requests.get(url=URL, params=param, timeout=5)
-    
+        # get the API response from the request
+        response = requests.get(url=WEATHER_URL, params=param, timeout=5)
+        
+        # get data from the json response
         data = response.json()
-        # print(f"JSON DATA:\n{data}")
+        
+        #find a status cdoe
         status_code = data['cod']
         
+        # check if status code is OK and 200
         if(status_code == 200):
             
+            # get city name
             name = data['name']
+            
+            # get current temperature
             temp = data['main']['temp']
+            
+            # get weather description
             desc = data['weather'][0]['description']
             
-            complete_info = f"Weather in {name} is {temp} Celsius, {desc}"
+            # find a unit symbol based on the user input
+            unit_symbol = "°C" if units == "metric" else "°F"
+            
+            # create complete info of the weather
+            complete_info = f"Weather in {name} is {temp} {unit_symbol}, {desc}"
+            
+            # return 
             return complete_info
         
+        # if status code is 404 then show message, city not found
         elif(status_code == "404"):
             return f"City {city} not found"
         
+        # if status code is not 200 and 404 then show message, something went wrong
         else:
             return "Something went wrong...!!" 
     
@@ -40,25 +58,3 @@ def get_weather(city):
         
     except requests.exceptions.RequestException as e:
         return f"Network error occurred: {e}"
-    
- 
-# Explanation:
-# 
-# We use argparse.ArgumentParser to define expected command-line arguments.
-# city is a positional argument (required).
-# args.city contains the value passed on the command line.
-# We print the full request URL to help with debugging.
-# 
-# What is argparse?
-# It’s a standard Python library to handle command-line arguments easily.
-# Lets users pass inputs or options to your script/program when running it from a terminal.
-# Automatically generates help messages (-h or --help).
-# Parses and validates inputs, so you don’t have to write manual input checks.    
-def main():
-    parser = argparse.ArgumentParser(description="Get Current weather for a city.")
-    parser.add_argument("city", help="Name of the city to featch a weather from")
-    args = parser.parse_args()
-    print(get_weather(args.city))
-    
-if __name__=="__main__":
-    main()
